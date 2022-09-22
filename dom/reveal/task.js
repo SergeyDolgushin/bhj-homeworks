@@ -1,19 +1,26 @@
 const elements = document.querySelectorAll('.reveal');
 const viewport = window.visualViewport;
 
+const isVisible = (element) => {
+  const {top, bottom} = element.getBoundingClientRect();
+
+  if (bottom < 0 || top > window.innerHeight) {
+    return false;
+  }
+
+  return true
+}
+
+
 const toggleActiveState = () => {
     elements.forEach((element) => {
-        if (element.getBoundingClientRect().y < viewport.height) {
-            element.classList.add('reveal_active');
-        }
-        if (element.getBoundingClientRect().y < -100 
-            || element.getBoundingClientRect().y > viewport.height) {
-                element.classList.remove('reveal_active');
-        }
+      isVisible(element)
+        ? element.classList.add('reveal_active')
+        : element.classList.remove('reveal_active');
     });
 }
 
 
 document.addEventListener('scroll', () => {
-    toggleActiveState();    
+    toggleActiveState();
 });

@@ -2,9 +2,13 @@ const chatWidget = document.querySelector('.chat-widget');
 
 
 class ChatWidget {
+  #idleTimer = null;
+  #currentChatState = null;
+
   constructor(container) {
     this.messagesContainer = container.querySelector('.chat-widget__messages');
     this.inputMessage = container.querySelector('.chat-widget__input');
+    this.#currentChatState = this.messagesContainer.innerHTML;
 
     this.chatEvents();
   }
@@ -17,24 +21,35 @@ class ChatWidget {
   openChat(clb) {
     chatWidget.classList.add('chat-widget_active');
     this.addMessageToChat(clb);
+    this.#idleTimer = this.askUser('Чем вам помочь?');
   }
 
   getMessage() {
     this.inputMessage.addEventListener('keyup', (evt) => {
-      if (evt.key === 'Enter') {
+      if (evt.key === 'Enter' && evt.target.value) {
         this.addMessageToChat(this.userMessage((evt.target.value.trim())));
         evt.target.value = '';
         this.addMessageToChat(this.robotAnswer(
           'Добрый день, мы ещё не проснулись. Позвоните через 10 лет'
         ));
+        this.messagesContainer.scrollIntoView({block: "end"});
+      }
+
+      if (this.#idleTimer) {
+        clearTimeout(this.#idleTimer);
       }
     });
   }
 
   addMessageToChat(html) {
-    const currentChatState = this.messagesContainer.innerHTML;
-    this.messagesContainer.innerHTML = currentChatState + html;
+    this.#currentChatState = this.messagesContainer.innerHTML;
+    this.messagesContainer.innerHTML = this.#currentChatState + html;
   }
+
+  askUser(text) {
+    return setTimeout(() => this.addMessageToChat(this.robotAnswer(text)), 5000);
+  }
+
 
   robotHello() {
     const currentTime = new Date();
@@ -65,6 +80,7 @@ class ChatWidget {
       </div>
     `
   }
+
 }
 
 new ChatWidget(chatWidget);
